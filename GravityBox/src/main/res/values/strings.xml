@@ -1204,6 +1204,7 @@
     <string name="clock_date_format_3">Date format: d MMM</string>
     <string name="clock_date_format_4">Date format: MMM d</string>
     <string name="clock_date_format_5">Date format: d</string>
+    <string name="clock_date_format_6">Date format: M月d日</string>
 
     <!-- Headset plug/unplug actions -->
     <string name="pref_cat_headset_actions_title">Headset actions</string>

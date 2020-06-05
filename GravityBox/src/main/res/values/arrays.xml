@@ -404,6 +404,7 @@
         <item>@string/clock_date_format_3</item>
         <item>@string/clock_date_format_4</item>
         <item>@string/clock_date_format_5</item>
+        <item>@string/clock_date_format_6</item>
     </string-array>
 
     <string-array name="clock_date_values" translatable="false">
@@ -414,6 +415,7 @@
         <item>d MMM</item>
         <item>MMM d</item>
         <item>d</item>
+        <item>M月d日</item>
     </string-array>
 
     <string-array name="clock_dow_entries" translatable="false">
