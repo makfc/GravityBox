@@ -52,7 +52,7 @@ public class StatusbarClock implements BroadcastMediator.Receiver {
     private static final String TAG = "GB:StatusbarClock";
     private static final boolean DEBUG = false;
 
-    public enum ClockPosition { DEFAULT, LEFT, RIGHT, CENTER }
+    public enum ClockPosition {DEFAULT, LEFT, RIGHT, CENTER}
 
     private TextView mClock;
     private boolean mAmPmHide;
@@ -78,6 +78,7 @@ public class StatusbarClock implements BroadcastMediator.Receiver {
         int gravity;
         int paddingStart;
         int paddingEnd;
+
         ClockPositionInfo(ViewGroup parent, int position, int gravity, int paddingStart, int paddingEnd) {
             this.parent = parent;
             this.position = position;
@@ -155,6 +156,7 @@ public class StatusbarClock implements BroadcastMediator.Receiver {
             public void onViewAttachedToWindow(View v) {
                 updateSecondsHandler();
             }
+
             @Override
             public void onViewDetachedFromWindow(View v) {
                 updateSecondsHandler();
@@ -218,7 +220,7 @@ public class StatusbarClock implements BroadcastMediator.Receiver {
     public void setClockVisibility(boolean show) {
         if (mClock != null) {
             mClock.setVisibility(show && !mClockHidden ? View.VISIBLE : View.GONE);
-            if (mClock.getVisibility() == View.VISIBLE) { 
+            if (mClock.getVisibility() == View.VISIBLE) {
                 if (mSecondsHandler != null) {
                     mSecondsHandler.postAtTime(mSecondTick,
                             SystemClock.uptimeMillis() / 1000 * 1000 + 1000);
@@ -260,7 +262,7 @@ public class StatusbarClock implements BroadcastMediator.Receiver {
                         if (mSecondsFormat == null) {
                             mSecondsFormat = new SimpleDateFormat(
                                     DateFormat.getBestDateTimePattern(
-                                    Locale.getDefault(), is24 ? "Hms" : "hms"));
+                                            Locale.getDefault(), is24 ? "Hms" : "hms"));
                         }
                         clockText = mSecondsFormat.format(calendar.getTime());
                         if (DEBUG) log("New clock text with seconds: " + clockText);
@@ -276,13 +278,14 @@ public class StatusbarClock implements BroadcastMediator.Receiver {
                         amPmIndex = -1;
                     } else if (!mAmPmHide && !is24 && amPmIndex == -1) {
                         // insert AM/PM if missing
-                        if(Locale.getDefault().equals(Locale.TAIWAN) || Locale.getDefault().equals(Locale.CHINA)) {
-                            clockText = amPm + " " + clockText;
+                        if (Locale.getDefault().getLanguage().equals(Locale.CHINESE.getLanguage())) {
+                            clockText = amPm + clockText;
                         } else {
                             clockText += " " + amPm;
                         }
                         amPmIndex = clockText.indexOf(amPm);
-                        if (DEBUG) log("AM/PM added. New clockText: '" + clockText + "'; New AM/PM index: " + amPmIndex);
+                        if (DEBUG)
+                            log("AM/PM added. New clockText: '" + clockText + "'; New AM/PM index: " + amPmIndex);
                     }
                     CharSequence date = "";
                     // apply date to statusbar clock, not the notification panel clock
@@ -290,31 +293,29 @@ public class StatusbarClock implements BroadcastMediator.Receiver {
                         SimpleDateFormat df = (SimpleDateFormat) SimpleDateFormat.getDateInstance(SimpleDateFormat.SHORT);
                         String pattern = mClockShowDate.equals("localized") ?
                                 df.toLocalizedPattern().replaceAll(".?[Yy].?", "") : mClockShowDate;
-                        date = new SimpleDateFormat(pattern, Locale.getDefault()).format(calendar.getTime()) + " ";
+                        date = new SimpleDateFormat(pattern, Locale.getDefault()).format(calendar.getTime());
                     }
-                    clockText = date + clockText;
-                    CharSequence dow = "";
+                    clockText += " " + date;
+
+                    SpannableStringBuilder sb = new SpannableStringBuilder(clockText);
+                    String dow = "";
                     // apply day of week only to statusbar clock, not the notification panel clock
                     if (mClockShowDow != GravityBoxSettings.DOW_DISABLED && sbClock != null) {
                         dow = getFormattedDow(calendar.getDisplayName(
-                                Calendar.DAY_OF_WEEK, Calendar.SHORT, Locale.getDefault())) + " ";
+                                Calendar.DAY_OF_WEEK, Calendar.SHORT, Locale.getDefault()));
+                        clockText += " " + dow;
+                        sb = new SpannableStringBuilder(clockText);
+                        int dowIndex = clockText.indexOf(dow);
+                        sb.setSpan(new RelativeSizeSpan(mDowSize),
+                                dowIndex,
+                                dowIndex + dow.length(),
+                                Spannable.SPAN_EXCLUSIVE_INCLUSIVE);
                     }
-                    clockText = dow + clockText;
-                    SpannableStringBuilder sb = new SpannableStringBuilder(clockText);
-                    sb.setSpan(new RelativeSizeSpan(mDowSize), 0, dow.length() + date.length(),
-                            Spannable.SPAN_EXCLUSIVE_INCLUSIVE);
                     if (amPmIndex > -1) {
-                        if(Locale.getDefault().equals(Locale.TAIWAN) || Locale.getDefault().equals(Locale.CHINA)) {
-                            sb.setSpan(new RelativeSizeSpan(mAmPmSize), dow.length() + date.length() + amPmIndex,
-                                    dow.length() + date.length() + amPmIndex + amPm.length(),
-                                    Spannable.SPAN_EXCLUSIVE_INCLUSIVE);
-                        } else {
-                            int offset = Character.isWhitespace(clockText.charAt(dow.length() + date.length() + amPmIndex - 1)) ?
-                                    1 : 0;
-                            sb.setSpan(new RelativeSizeSpan(mAmPmSize), dow.length() + date.length() + amPmIndex - offset,
-                                    dow.length() + date.length() + amPmIndex + amPm.length(),
-                                    Spannable.SPAN_EXCLUSIVE_INCLUSIVE);
-                        }
+                        sb.setSpan(new RelativeSizeSpan(mAmPmSize),
+                                amPmIndex,
+                                amPmIndex + amPm.length(),
+                                Spannable.SPAN_EXCLUSIVE_INCLUSIVE);
                     }
                     if (DEBUG) log("Final clockText: '" + sb + "'");
                     param.setResult(sb);
@@ -327,12 +328,13 @@ public class StatusbarClock implements BroadcastMediator.Receiver {
 
     private String getFormattedDow(String inDow) {
         switch (mClockShowDow) {
-            case GravityBoxSettings.DOW_LOWERCASE: 
+            case GravityBoxSettings.DOW_LOWERCASE:
                 return inDow.toLowerCase(Locale.getDefault());
             case GravityBoxSettings.DOW_UPPERCASE:
                 return inDow.toUpperCase(Locale.getDefault());
             case GravityBoxSettings.DOW_STANDARD:
-            default: return inDow;
+            default:
+                return inDow;
         }
     }
 
@@ -408,8 +410,8 @@ public class StatusbarClock implements BroadcastMediator.Receiver {
             }
         }
         if (intent.getAction().equals(Intent.ACTION_CONFIGURATION_CHANGED) ||
-            intent.getAction().equals(Intent.ACTION_TIME_CHANGED) ||
-            intent.getAction().equals(Intent.ACTION_TIMEZONE_CHANGED)) {
+                intent.getAction().equals(Intent.ACTION_TIME_CHANGED) ||
+                intent.getAction().equals(Intent.ACTION_TIMEZONE_CHANGED)) {
             mSecondsFormat = null;
         }
     }

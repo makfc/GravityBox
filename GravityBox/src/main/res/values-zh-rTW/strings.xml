@@ -1197,6 +1197,7 @@
     <string name="clock_date_format_3">日期格式：d MMM</string>
     <string name="clock_date_format_4">日期格式：MMM d</string>
     <string name="clock_date_format_5">日期格式：d</string>
+    <string name="clock_date_format_6">日期格式：M月d日</string>
 
     <!-- Headset plug/unplug actions -->
     <string name="pref_cat_headset_actions_title">插拔耳機觸發的動作</string>
